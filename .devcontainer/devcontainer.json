@@ -1,0 +1,23 @@
+{
+  "name": "HookRelay (.NET 8)",
+  "image": "mcr.microsoft.com/dotnet/sdk:8.0",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "ms-azuretools.vscode-docker",
+        "humao.rest-client"
+      ]
+    }
+  },
+  "forwardPorts": [8080],
+  "containerEnv": {
+    "DATABASE_URL": "Host=host.docker.internal;Port=5432;Database=hookrelay;Username=hookrelay;Password=hookrelay",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
+  },
+  "postCreateCommand": "dotnet --info"
+}

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: hookrelay
+    runtime: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DATABASE_URL
+        sync: false
+      - key: Delivery__MaxAttempts
+        value: "6"
+      - key: Delivery__TimeoutSeconds
+        value: "10"
+      - key: Delivery__PollIntervalSeconds
+        value: "2"

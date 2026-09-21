@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: format + analyze + test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: dotnet format
+        run: dotnet format --verify-no-changes --no-restore --verbosity diagnostic
+
+      - name: Build (analyzers, warnings as errors)
+        run: dotnet build --no-restore --configuration Release -warnaserror
+
+      - name: dotnet test
+        run: dotnet test --no-build --configuration Release --verbosity normal
