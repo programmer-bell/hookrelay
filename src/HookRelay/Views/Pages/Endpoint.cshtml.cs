@@ -12,11 +12,16 @@ public class EndpointModel : PageModel
 
     private readonly EndpointRepository _endpoints;
     private readonly CaptureRepository _captures;
+    private readonly DeliveryRepository _deliveries;
 
-    public EndpointModel(EndpointRepository endpoints, CaptureRepository captures)
+    public EndpointModel(
+        EndpointRepository endpoints,
+        CaptureRepository captures,
+        DeliveryRepository deliveries)
     {
         _endpoints = endpoints;
         _captures = captures;
+        _deliveries = deliveries;
     }
 
     [FromRoute]
@@ -46,7 +51,35 @@ public class EndpointModel : PageModel
         Endpoint = endpoint;
         IngestUrl = $"{Request.Scheme}://{Request.Host}/h/{endpoint.Slug}";
         StreamUrl = $"/endpoints/{endpoint.Slug}/stream";
-        Requests = (IReadOnlyList<RequestRow>)await _captures.GetRecentAsync(endpoint.Id, RecentRequestLimit, ct);
+
+        var requests = await _captures.GetRecentAsync(endpoint.Id, RecentRequestLimit, ct);
+        var attemptsByRequest = await LoadAttemptsAsync(requests, ct);
+
+        Requests = requests
+            .Select(row => row with
+            {
+                Attempts = attemptsByRequest.TryGetValue(row.Id, out var attempts) ? attempts : [],
+            })
+            .ToList();
+
         return Page();
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, IReadOnlyList<HookRelay.Domain.DeliveryAttempt>>> LoadAttemptsAsync(
+        IReadOnlyList<RequestRow> requests,
+        CancellationToken ct)
+    {
+        if (requests.Count == 0)
+        {
+            return new Dictionary<Guid, IReadOnlyList<HookRelay.Domain.DeliveryAttempt>>();
+        }
+
+        var attempts = await _deliveries.GetAttemptsAsync(
+            requests.Select(r => r.Id).ToList(),
+            ct);
+
+        return attempts
+            .GroupBy(a => a.RequestId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<HookRelay.Domain.DeliveryAttempt>)g.Select(a => a.Attempt).ToList());
     }
 }

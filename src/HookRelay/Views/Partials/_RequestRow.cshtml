@@ -4,7 +4,7 @@
     <td><span class="badge text-bg-dark method-badge">@Model.Method</span></td>
     <td class="text-nowrap">@Model.ReceivedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
     <td class="text-break">@(Model.Query ?? "—")</td>
-    <td>@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</td>
+    <td><span class="request-status-cell">@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</span></td>
     <td class="text-end">
         <button type="button"
                 class="btn btn-sm btn-outline-secondary"
@@ -48,6 +48,43 @@
                 <div class="col-md-7">
                     <h6 class="text-muted">Body</h6>
                     <pre class="request-body"><code class="small">@RequestFormatter.PrettyPrintBody(Model.Body)</code></pre>
+                </div>
+
+                <div class="col-12">
+                    <h6 class="text-muted">Attempts</h6>
+                    @if (Model.Attempts.Count == 0)
+                    {
+                        <p class="text-muted small mb-0">No attempts yet.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Duration</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (var i = 0; i < Model.Attempts.Count; i++)
+                                    {
+                                        var attempt = Model.Attempts[i];
+                                        <tr>
+                                            <td class="small">@(i + 1)</td>
+                                            <td class="small text-nowrap">@attempt.AttemptedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                            <td class="small">@(attempt.StatusCode is null ? "—" : attempt.StatusCode.Value.ToString())</td>
+                                            <td class="small">@(attempt.DurationMs is null ? "—" : $"{attempt.DurationMs.Value} ms")</td>
+                                            <td class="small text-break">@(attempt.Error ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

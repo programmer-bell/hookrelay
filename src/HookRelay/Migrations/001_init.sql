@@ -35,7 +35,7 @@ CREATE TABLE deliveries (
     status text NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'delivering', 'succeeded', 'dead')),
     attempt_count int NOT NULL DEFAULT 0,
-    next_attempt_at timestamptz NOT NULL DEFAULT now(),
+    next_attempt_at timestamptz,
     last_status_code int,
     last_error text,
     updated_at timestamptz NOT NULL DEFAULT now()

@@ -9,6 +9,7 @@ using HookRelay.Features.Inspector;
 using HookRelay.Middleware;
 using HookRelay.Rendering;
 using HookRelay.Services;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +22,23 @@ builder.Services.AddSingleton(services =>
     Db.Open(builder.Configuration, services.GetRequiredService<ILogger<Db>>()));
 builder.Services.AddSingleton<EndpointRepository>();
 builder.Services.AddSingleton<CaptureRepository>();
+builder.Services.AddSingleton<DeliveryRepository>();
 builder.Services.AddSingleton<TargetUrlValidator>();
+builder.Services.AddSingleton(services =>
+{
+    var options = services.GetRequiredService<IOptions<AppOptions>>().Value;
+    return new RetryPolicy(options.InitialDelaySeconds, options.MaxDelaySeconds);
+});
 builder.Services.AddSingleton<IRazorViewRenderer, RazorViewRenderer>();
 builder.Services.AddSingleton<EventBus>();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+builder.Services.AddHostedService<DeliveryWorker>();
+
+builder.Services.AddHttpClient(DeliveryWorker.HttpClientName, (services, client) =>
+{
+    var options = services.GetRequiredService<IOptions<AppOptions>>().Value;
+    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+});
 
 builder.Services.AddRateLimiter(options =>
 {
