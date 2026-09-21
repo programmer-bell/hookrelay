@@ -5,7 +5,7 @@ description: Coding rules, architecture constraints, and conventions for buildin
 
 # HookRelay: Engineering Instructions
 
-You are building **HookRelay**, a webhook capture-and-relay service. Follow this file strictly. The companion file `/.agents/Roadmap/SKILL.md` defines WHAT to build and in WHICH order. This file defines HOW.
+You are building **HookRelay**, a webhook capture-and-relay service. Follow this file strictly. The companion file `/.agents/roadmap/SKILL.md` defines WHAT to build and in WHICH order. This file defines HOW.
 
 ## 0. Environment Constraints (critical)
 
@@ -118,7 +118,7 @@ You are building **HookRelay**, a webhook capture-and-relay service. Follow this
 
 ## 9. Workflow Rules for the Agent
 
-1. Before each task, read `/.agents/Roadmap/SKILL.md` and identify the current phase.
+1. Before each task, read `/.agents/roadmap/SKILL.md` and identify the current phase.
 2. Work in **small, verifiable steps**. After each step: build (`dotnet build`), then run the relevant tests.
 3. Do not skip ahead of the current phase.
 4. When a phase's **Definition of Done** is met, tick its checkboxes in the Roadmap file and stop for user review.

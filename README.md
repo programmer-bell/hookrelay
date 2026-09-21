@@ -100,8 +100,8 @@ Everything else (rate limiting, health checks, HTTP client, logging, JSON) is bu
 ```
 hookrelay/
 ├── .agents/
-│   ├── Instructions/SKILL.md      # Rules for the AI agent (how to code here)
-│   └── Roadmap/SKILL.md           # Phased build plan for the AI agent
+│   ├── instructions/SKILL.md      # Rules for the AI agent (how to code here)
+│   └── roadmap/SKILL.md           # Phased build plan for the AI agent
 ├── src/
 │   └── HookRelay/
 │       ├── Program.cs             # Composition root, DI, middleware, route mapping

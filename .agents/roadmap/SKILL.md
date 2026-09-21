@@ -5,7 +5,7 @@ description: Phased, checkbox-driven build plan for HookRelay. Use this to deter
 
 # HookRelay: Roadmap
 
-Read `/.agents/Instructions/SKILL.md` first. Build **one phase at a time**. Do not start a phase until the previous phase's Definition of Done (DoD) is fully checked. Tick boxes (`- [x]`) in this file as you complete tasks. After finishing a phase, **stop and summarize** for the user.
+Read `/.agents/instructions/SKILL.md` first. Build **one phase at a time**. Do not start a phase until the previous phase's Definition of Done (DoD) is fully checked. Tick boxes (`- [x]`) in this file as you complete tasks. After finishing a phase, **stop and summarize** for the user.
 
 All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instructions §0).
 
