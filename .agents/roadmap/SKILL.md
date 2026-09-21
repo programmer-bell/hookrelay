@@ -66,13 +66,13 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 3: Ingest API
 **Goal:** Capture webhooks reliably.
 
-- [ ] `ANY /h/{slug}`: read body (256 KB cap → `413`), headers, query, method
-- [ ] Idempotency-Key handling (duplicate returns `200` + original id)
-- [ ] **Single transaction:** insert `captured_requests` + `deliveries(status='pending', next_attempt_at=now())`
-- [ ] Built-in rate limiter (60/min per slug) with `429` + `Retry-After`
-- [ ] Security-headers middleware
-- [ ] Redact `Authorization` and `Cookie` header values before storing (store `[redacted]`)
-- [ ] `EventBus` (`Channel<T>`-based, multi-subscriber, bounded, drop-oldest) and publish a "request captured" event
+- [x] `ANY /h/{slug}`: read body (256 KB cap → `413`), headers, query, method
+- [x] Idempotency-Key handling (duplicate returns `200` + original id)
+- [x] **Single transaction:** insert `captured_requests` + `deliveries(status='pending', next_attempt_at=now())`
+- [x] Built-in rate limiter (60/min per slug) with `429` + `Retry-After`
+- [x] Security-headers middleware
+- [x] Redact `Authorization` and `Cookie` header values before storing (store `[redacted]`)
+- [x] `EventBus` (`Channel<T>`-based, multi-subscriber, bounded, drop-oldest) and publish a "request captured" event
 
 **DoD:** `curl -X POST localhost:8080/h/{slug} -d '{"a":1}'` returns `202`, rows exist in both tables, duplicate idempotency key creates nothing, 61st request in a minute returns `429`.
 
