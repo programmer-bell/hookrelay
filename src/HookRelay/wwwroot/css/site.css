@@ -1,0 +1,46 @@
+:root {
+  --hookrelay-bg: #0f172a;
+  --hookrelay-surface: #1e293b;
+  --hookrelay-border: #334155;
+  --hookrelay-text: #e2e8f0;
+  --hookrelay-muted: #94a3b8;
+  --hookrelay-accent: #38bdf8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--hookrelay-bg);
+  color: var(--hookrelay-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1, h2, h3 {
+  color: var(--hookrelay-text);
+}
+
+a {
+  color: var(--hookrelay-accent);
+}
+
+.card {
+  background-color: var(--hookrelay-surface);
+  border: 1px solid var(--hookrelay-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.muted {
+  color: var(--hookrelay-muted);
+}
