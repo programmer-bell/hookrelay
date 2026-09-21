@@ -11,4 +11,11 @@
     <PackageReference Include="Npgsql" Version="8.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Migrations\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
