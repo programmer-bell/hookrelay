@@ -21,10 +21,10 @@ jobs:
         run: dotnet restore
 
       - name: dotnet format
-        run: dotnet format --verify-no-changes --no-restore --verbosity diagnostic
+        run: dotnet format --verify-no-changes --no-restore
 
       - name: Build (analyzers, warnings as errors)
-        run: dotnet build --no-restore --configuration Release -warnaserror
+        run: dotnet build --no-restore -c Release -warnaserror
 
       - name: dotnet test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test --no-build -c Release

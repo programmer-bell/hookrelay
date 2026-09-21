@@ -51,8 +51,6 @@ services:
       - nuget-cache:/root/.nuget/packages
     environment:
       DATABASE_URL: "Host=db;Port=5432;Database=hookrelay;Username=hookrelay;Password=hookrelay"
-    depends_on:
-      - db
 
   # ---- Local PostgreSQL ----
   db:

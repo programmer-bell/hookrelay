@@ -15,6 +15,7 @@ WORKDIR /src
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 
 # Restore first for better layer caching
+COPY global.json Directory.Build.props .editorconfig ./
 COPY src/HookRelay/HookRelay.csproj src/HookRelay/
 RUN dotnet restore src/HookRelay/HookRelay.csproj
 
