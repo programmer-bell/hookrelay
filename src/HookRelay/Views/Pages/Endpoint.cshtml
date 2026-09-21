@@ -34,28 +34,29 @@
 
             <section>
                 <h2 class="h5 mb-2">Recent requests</h2>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Method</th>
-                                <th>Received</th>
-                                <th>Query</th>
-                                <th>Delivery</th>
-                                <th class="text-end">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="request-rows"
-                               hx-ext="sse"
-                               sse-connect="@Model.StreamUrl"
-                               sse-swap="request-row"
-                               hx-swap="afterbegin">
-                            @foreach (var row in Model.Requests)
-                            {
-                                @await Html.PartialAsync("~/Views/Partials/_RequestRow.cshtml", row)
-                            }
-                        </tbody>
-                    </table>
+                <div id="live-feed" hx-ext="sse" sse-connect="@Model.StreamUrl">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Received</th>
+                                    <th>Query</th>
+                                    <th>Delivery</th>
+                                    <th class="text-end">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="request-rows"
+                                   sse-swap="request-row"
+                                   hx-swap="afterbegin">
+                                @foreach (var row in Model.Requests)
+                                {
+                                    @await Html.PartialAsync("~/Views/Partials/_RequestRow.cshtml", row)
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <span id="delivery-status-target" class="d-none" sse-swap="delivery-status"></span>
                 </div>
             </section>
         }
@@ -76,7 +77,24 @@
         });
 
         var requestRows = document.getElementById('request-rows');
-        document.body.addEventListener('htmx:sseMessage', function () {
+        document.body.addEventListener('htmx:sseMessage', function (event) {
+            var detail = event.detail;
+            if (!detail || !detail.data) return;
+
+            if (detail.type === 'delivery-status') {
+                var parsed = document.createElement('div');
+                parsed.innerHTML = detail.data;
+                var wrapper = parsed.querySelector('span[data-request-id]');
+                if (!wrapper) return;
+                var row = requestRows.querySelector('tr[data-request-id="' + wrapper.getAttribute('data-request-id') + '"]');
+                if (!row) return;
+                var badge = wrapper.querySelector('.badge');
+                var statusCell = row.querySelector('.request-status-cell');
+                if (badge && statusCell) { statusCell.innerHTML = badge.outerHTML; }
+                return;
+            }
+
+            if (detail.type !== 'request-row') return;
             var seen = new Set();
             requestRows.querySelectorAll('tr[data-request-id]').forEach(function (row) {
                 var id = row.getAttribute('data-request-id');

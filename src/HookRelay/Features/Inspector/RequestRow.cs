@@ -1,3 +1,5 @@
+using HookRelay.Domain;
+
 namespace HookRelay.Features.Inspector;
 
 public sealed record RequestRow(
@@ -7,4 +9,7 @@ public sealed record RequestRow(
     string Body,
     string? Query,
     DateTime ReceivedAt,
-    string DeliveryStatus);
+    string DeliveryStatus)
+{
+    public IReadOnlyList<DeliveryAttempt> Attempts { get; init; } = [];
+}

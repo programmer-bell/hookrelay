@@ -32,40 +32,58 @@ public static class InspectorRoutes
         context.Response.ContentType = "text/event-stream";
         context.Response.Headers.CacheControl = "no-cache";
 
-        var reader = eventBus.Subscribe();
+        var requests = eventBus.Subscribe<RequestCapturedEvent>();
+        var statuses = eventBus.Subscribe<DeliveryStatusChangedEvent>();
         try
         {
             while (true)
             {
-                var readTask = reader.WaitToReadAsync(ct).AsTask();
+                var readRequests = requests.WaitToReadAsync(ct).AsTask();
+                var readStatuses = statuses.WaitToReadAsync(ct).AsTask();
                 var heartbeatTask = Task.Delay(HeartbeatInterval, ct);
-                var firstToComplete = await Task.WhenAny(readTask, heartbeatTask);
+                var firstToComplete = await Task.WhenAny(readRequests, readStatuses, heartbeatTask);
 
-                if (firstToComplete == readTask && readTask.Result)
+                if (firstToComplete == readRequests && readRequests.Result)
                 {
-                    while (reader.TryRead(out var @event))
+                    while (requests.TryRead(out var @event))
                     {
-                        if (!string.Equals(@event.Slug, slug, StringComparison.Ordinal))
+                        if (string.Equals(@event.Slug, slug, StringComparison.Ordinal))
                         {
-                            continue;
+                            var row = new RequestRow(
+                                @event.CapturedRequestId,
+                                @event.Method,
+                                @event.Headers,
+                                @event.Body,
+                                @event.Query,
+                                @event.ReceivedAt,
+                                DeliveryStatus.Pending);
+
+                            var html = await renderer.RenderToStringAsync(
+                                "~/Views/Partials/_RequestRow.cshtml",
+                                row,
+                                ct);
+                            await WriteFrameAsync(context, "request-row", html, ct);
                         }
-
-                        var row = new RequestRow(
-                            @event.CapturedRequestId,
-                            @event.Method,
-                            @event.Headers,
-                            @event.Body,
-                            @event.Query,
-                            @event.ReceivedAt,
-                            DeliveryStatus.Pending);
-
-                        var html = await renderer.RenderToStringAsync(
-                            "~/Views/Partials/_RequestRow.cshtml",
-                            row,
-                            ct);
-                        await WriteFrameAsync(context, "request-row", html, ct);
-                        await context.Response.Body.FlushAsync(ct);
                     }
+
+                    await context.Response.Body.FlushAsync(ct);
+                }
+                else if (firstToComplete == readStatuses && readStatuses.Result)
+                {
+                    while (statuses.TryRead(out var @event))
+                    {
+                        if (string.Equals(@event.Slug, slug, StringComparison.Ordinal))
+                        {
+                            var badgeHtml = await renderer.RenderToStringAsync(
+                                "~/Views/Partials/_DeliveryBadge.cshtml",
+                                @event.Status,
+                                ct);
+                            var data = $"<span data-request-id=\"{@event.RequestId}\">{badgeHtml}</span>";
+                            await WriteFrameAsync(context, "delivery-status", data, ct);
+                        }
+                    }
+
+                    await context.Response.Body.FlushAsync(ct);
                 }
                 else
                 {
@@ -76,7 +94,8 @@ public static class InspectorRoutes
         }
         finally
         {
-            eventBus.Unsubscribe(reader);
+            eventBus.Unsubscribe(requests);
+            eventBus.Unsubscribe(statuses);
         }
     }
 

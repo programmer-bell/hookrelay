@@ -7,11 +7,11 @@ public sealed class EventBus
     private const int SubscriberCapacity = 100;
 
     private readonly object _lock = new();
-    private readonly List<Channel<RequestCapturedEvent>> _subscribers = [];
+    private readonly Dictionary<Type, List<object>> _subscribers = [];
 
-    public ChannelReader<RequestCapturedEvent> Subscribe()
+    public ChannelReader<T> Subscribe<T>()
     {
-        var channel = Channel.CreateBounded<RequestCapturedEvent>(new BoundedChannelOptions(SubscriberCapacity)
+        var channel = Channel.CreateBounded<T>(new BoundedChannelOptions(SubscriberCapacity)
         {
             FullMode = BoundedChannelFullMode.DropOldest,
             SingleReader = false,
@@ -20,26 +20,40 @@ public sealed class EventBus
 
         lock (_lock)
         {
-            _subscribers.Add(channel);
+            if (!_subscribers.TryGetValue(typeof(T), out var subscribers))
+            {
+                subscribers = [];
+                _subscribers.Add(typeof(T), subscribers);
+            }
+
+            subscribers.Add(channel);
         }
 
         return channel.Reader;
     }
 
-    public void Unsubscribe(ChannelReader<RequestCapturedEvent> reader)
+    public void Unsubscribe<T>(ChannelReader<T> reader)
     {
         lock (_lock)
         {
-            _subscribers.RemoveAll(channel => channel.Reader == reader);
+            if (_subscribers.TryGetValue(typeof(T), out var subscribers))
+            {
+                subscribers.RemoveAll(channel => ((Channel<T>)channel).Reader == reader);
+            }
         }
     }
 
-    public void Publish(RequestCapturedEvent @event)
+    public void Publish<T>(T @event)
     {
-        Channel<RequestCapturedEvent>[] subscribers;
+        Channel<T>[] subscribers;
         lock (_lock)
         {
-            subscribers = _subscribers.ToArray();
+            if (!_subscribers.TryGetValue(typeof(T), out var existing))
+            {
+                return;
+            }
+
+            subscribers = existing.Cast<Channel<T>>().ToArray();
         }
 
         foreach (var channel in subscribers)
