@@ -33,7 +33,7 @@ The build is executed in phases from [`.agents/roadmap/SKILL.md`](.agents/roadma
 | Phase | Scope | Status | Bar |
 |---|---|---|---|
 | 0 | Scaffold & Tooling | ✔ 12/12 | ██████████ |
-| 1 | Data Layer & Migrations | ○ 0/7 | ░░░░░░░░░░ |
+| 1 | Data Layer & Migrations | ✔ 7/7 | ██████████ |
 | 2 | Endpoint Management UI | ○ 0/6 | ░░░░░░░░░░ |
 | 3 | Ingest API | ○ 0/7 | ░░░░░░░░░░ |
 | 4 | Inspector UI & Live Feed | ○ 0/5 | ░░░░░░░░░░ |

@@ -33,19 +33,19 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 1: Data Layer & Migrations
 **Goal:** Postgres connectivity and a migration system.
 
-- [ ] `AppOptions` (`Delivery` section: MaxAttempts, TimeoutSeconds, PollIntervalSeconds) bound from config
-- [ ] `Db` wrapper: parse `DATABASE_URL` (URI and key=value), SSL rule, startup connection retry (5 × 2s)
-- [ ] `Migrator`: `schema_migrations` table, apply ordered `.sql` files transactionally, embedded as content files copied to output
-- [ ] `001_init.sql`: tables `endpoints`, `captured_requests`, `deliveries`, `delivery_attempts`, with indexes:
+- [x] `AppOptions` (`Delivery` section: MaxAttempts, TimeoutSeconds, PollIntervalSeconds) bound from config
+- [x] `Db` wrapper: parse `DATABASE_URL` (URI and key=value), SSL rule, startup connection retry (5 × 2s)
+- [x] `Migrator`: `schema_migrations` table, apply ordered `.sql` files transactionally, embedded as content files copied to output
+- [x] `001_init.sql`: tables `endpoints`, `captured_requests`, `deliveries`, `delivery_attempts`, with indexes:
   - unique `endpoints(slug)`
   - `deliveries(status, next_attempt_at)`
   - unique partial index on `captured_requests(endpoint_id, idempotency_key) WHERE idempotency_key IS NOT NULL`
   - `captured_requests(endpoint_id, received_at DESC)`
-- [ ] Domain records + `EndpointRepository` (create, get by slug, list, delete)
-- [ ] `/readyz` endpoint running `SELECT 1`
-- [ ] Add a local `postgres` service to docker-compose (already provided) and confirm migrations apply on boot
+- [x] Domain records + `EndpointRepository` (create, get by slug, list, delete)
+- [x] `/readyz` endpoint running `SELECT 1`
+- [x] Add a local `postgres` service to docker-compose (already provided) and confirm migrations apply on boot
 
-**DoD:** App boots against local Postgres, creates the schema, `/readyz` = 200. Restarting does not re-apply migrations.
+**DoD:** App boots against local Postgres, creates the schema, `/readyz` = 200. Restarting does not re-apply migrations. (verified 2026-09-21)
 
 ---
 
