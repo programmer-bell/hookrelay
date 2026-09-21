@@ -1,0 +1,35 @@
+@using HookRelay.Features.Endpoints
+@model EndpointFormModel?
+@{
+    var form = Model ?? new EndpointFormModel("", "", Array.Empty<string>());
+}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title h5 mb-3">Add endpoint</h2>
+        <form hx-post="/endpoints"
+              hx-target="#endpoint-list"
+              hx-target-error="#endpoint-form"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+            @if (form.Errors.Count > 0)
+            {
+                <div class="alert alert-danger py-2" role="alert">
+                    <ul class="mb-0">
+                        @foreach (var error in form.Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+            <div class="mb-3">
+                <label class="form-label" for="endpoint-name">Name</label>
+                <input class="form-control" type="text" id="endpoint-name" name="name" value="@form.Name" placeholder="Stripe webhooks" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="endpoint-target-url">Target URL</label>
+                <input class="form-control" type="url" id="endpoint-target-url" name="target_url" value="@form.TargetUrl" placeholder="https://example.com/hooks" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Create endpoint</button>
+        </form>
+    </div>
+</div>
