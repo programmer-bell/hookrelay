@@ -26,6 +26,23 @@ Capture incoming webhooks on unique endpoints, inspect them live, and **reliably
 
 ---
 
+## 📊 Progress Dashboard
+
+The build is executed in phases from [`.agents/roadmap/SKILL.md`](.agents/roadmap/SKILL.md). Each phase lists its own tasks; this bar tracks completion as the roadmap checkboxes are ticked.
+
+| Phase | Scope | Status | Bar |
+|---|---|---|---|
+| 0 | Scaffold & Tooling | ✔ 12/12 | ██████████ |
+| 1 | Data Layer & Migrations | ○ 0/7 | ░░░░░░░░░░ |
+| 2 | Endpoint Management UI | ○ 0/6 | ░░░░░░░░░░ |
+| 3 | Ingest API | ○ 0/7 | ░░░░░░░░░░ |
+| 4 | Inspector UI & Live Feed | ○ 0/5 | ░░░░░░░░░░ |
+| 5 | Delivery Worker | ○ 0/6 | ░░░░░░░░░░ |
+| 6 | Replay & Operability | ○ 0/5 | ░░░░░░░░░░ |
+| 7 | Hardening, Tests, Deploy | ○ 0/6 | ░░░░░░░░░░ |
+
+---
+
 ## 🧱 Tech Stack
 
 - **Runtime:** .NET 8 (LTS), ASP.NET Core Minimal APIs

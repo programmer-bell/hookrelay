@@ -14,14 +14,19 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 0: Scaffold & Tooling
 **Goal:** An empty but runnable app inside Docker.
 
-- [ ] Create solution structure per README (`src/HookRelay`, `tests/HookRelay.Tests`, `HookRelay.sln`)
-- [ ] `HookRelay.csproj`: net8.0, `Nullable` enabled, `ImplicitUsings` enabled, packages `Npgsql` + `Dapper` only
-- [ ] Minimal `Program.cs` with `/healthz` returning `200 OK`
-- [ ] Add `.devcontainer/devcontainer.json` (mcr.microsoft.com/dotnet/sdk:8.0, extensions: C# Dev Kit, Docker)
-- [ ] Vendor `htmx.min.js` into `wwwroot/js/` (download in the Dockerfile-free way: `curl` from unpkg into the file once, then commit it)
-- [ ] `.env.example` with `DATABASE_URL` placeholder
+- [x] Create solution structure per README (`src/HookRelay`, `tests/HookRelay.Tests`, `HookRelay.sln`)
+- [x] `HookRelay.csproj`: net8.0, `Nullable` enabled, `ImplicitUsings` enabled, packages `Npgsql` + `Dapper` only
+- [x] `tests/HookRelay.Tests` (xUnit test project)
+- [x] Minimal `Program.cs` with `/healthz` returning `200 OK`
+- [x] `appsettings.json` with `Delivery` section (MaxAttempts 6, TimeoutSeconds 10, PollIntervalSeconds 2)
+- [x] Add `.devcontainer/devcontainer.json` (mcr.microsoft.com/dotnet/sdk:8.0, extensions: C# Dev Kit, Docker)
+- [x] Vendor `htmx.min.js` into `wwwroot/js/` (download in the Dockerfile-free way: `curl` from unpkg into the file once, then commit it) plus add `wwwroot/css/site.css`
+- [x] `.env.example` with `DATABASE_URL` placeholder
+- [x] `global.json` (SDK 8.0.100, rollForward latestFeature), `Directory.Build.props` (Nullable, ImplicitUsings, analyzers), `.editorconfig` (4 spaces, LF, file-scoped namespaces, System usings first)
+- [x] Fix GitHub Actions `ci.yml` (global.json-driven restore/format/build/test)
+- [x] Dockerfile restore paths, docker-compose `sdk` service, and devcontainer verified
 
-**DoD:** `docker compose up --build` serves `/healthz` = 200 at `localhost:8080`. `docker compose run --rm sdk dotnet test` runs (0 tests OK).
+**DoD:** `docker compose up --build` serves `/healthz` = 200 at `localhost:8080`. `docker compose run --rm sdk dotnet test` runs (0 tests OK). (verified 2026-09-21)
 
 ---
 
