@@ -69,6 +69,9 @@ public static class IngestEndpoints
             endpoint.Id,
             endpoint.Slug,
             request.Method,
+            captured.Headers,
+            captured.Body,
+            captured.Query,
             receivedAt));
 
         return Results.Json(new { id = captured.Id }, statusCode: StatusCodes.Status202Accepted);

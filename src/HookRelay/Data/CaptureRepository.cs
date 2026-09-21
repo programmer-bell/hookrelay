@@ -1,5 +1,6 @@
 using Dapper;
 using HookRelay.Domain;
+using HookRelay.Features.Inspector;
 
 namespace HookRelay.Data;
 
@@ -53,5 +54,26 @@ public sealed class CaptureRepository
 
         await transaction.CommitAsync(ct);
         return request;
+    }
+
+    public async Task<IReadOnlyList<RequestRow>> GetRecentAsync(
+        Guid endpointId,
+        int limit,
+        CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT c.id AS "Id", c.method AS "Method", c.headers AS "Headers",
+                   c.body AS "Body", c.query AS "Query", c.received_at AS "ReceivedAt",
+                   d.status AS "DeliveryStatus"
+            FROM captured_requests c
+            JOIN deliveries d ON d.request_id = c.id
+            WHERE c.endpoint_id = @EndpointId
+            ORDER BY c.received_at DESC, c.id DESC
+            LIMIT @Limit
+            """;
+
+        await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
+        var rows = await connection.QueryAsync<RequestRow>(sql, new { endpointId, limit });
+        return rows.ToList();
     }
 }
