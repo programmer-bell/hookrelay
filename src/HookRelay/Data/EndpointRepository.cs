@@ -1,4 +1,5 @@
 using Dapper;
+using Endpoint = HookRelay.Domain.Endpoint;
 
 namespace HookRelay.Data;
 
@@ -13,7 +14,9 @@ public sealed class EndpointRepository
         const string sql = """
             INSERT INTO endpoints (id, slug, name, target_url, signing_secret)
             VALUES (@Id, @Slug, @Name, @TargetUrl, @SigningSecret)
-            RETURNING *
+            RETURNING id AS "Id", slug AS "Slug", name AS "Name",
+                      target_url AS "TargetUrl", signing_secret AS "SigningSecret",
+                      created_at AS "CreatedAt"
             """;
 
         await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
@@ -22,7 +25,12 @@ public sealed class EndpointRepository
 
     public async Task<Endpoint?> GetBySlugAsync(string slug, CancellationToken ct = default)
     {
-        const string sql = "SELECT * FROM endpoints WHERE slug = @Slug";
+        const string sql = """
+            SELECT id AS "Id", slug AS "Slug", name AS "Name",
+                   target_url AS "TargetUrl", signing_secret AS "SigningSecret",
+                   created_at AS "CreatedAt"
+            FROM endpoints WHERE slug = @Slug
+            """;
 
         await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
         return await connection.QuerySingleOrDefaultAsync<Endpoint>(sql, new { slug });
@@ -30,7 +38,12 @@ public sealed class EndpointRepository
 
     public async Task<IReadOnlyList<Endpoint>> ListAsync(CancellationToken ct = default)
     {
-        const string sql = "SELECT * FROM endpoints ORDER BY created_at DESC";
+        const string sql = """
+            SELECT id AS "Id", slug AS "Slug", name AS "Name",
+                   target_url AS "TargetUrl", signing_secret AS "SigningSecret",
+                   created_at AS "CreatedAt"
+            FROM endpoints ORDER BY created_at DESC
+            """;
 
         await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
         var rows = await connection.QueryAsync<Endpoint>(sql);

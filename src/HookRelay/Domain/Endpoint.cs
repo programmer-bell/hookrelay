@@ -6,4 +6,4 @@ public sealed record Endpoint(
     string Name,
     string TargetUrl,
     string SigningSecret,
-    DateTimeOffset CreatedAt);
+    DateTime CreatedAt);

@@ -1,0 +1,47 @@
+@model System.Collections.Generic.IReadOnlyList<HookRelay.Domain.Endpoint>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-secondary" role="alert">No endpoints yet. Create one above to get started.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title h5 mb-3">Endpoints</h2>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Ingest slug</th>
+                            <th>Target URL</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var endpoint in Model)
+                        {
+                            <tr>
+                                <td>@endpoint.Name</td>
+                                <td><code>@endpoint.Slug</code></td>
+                                <td class="text-break">@endpoint.TargetUrl</td>
+                                <td>@endpoint.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-end">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            hx-delete="/endpoints/@endpoint.Id"
+                                            hx-target="#endpoint-list"
+                                            hx-confirm="Delete endpoint '@endpoint.Name'?">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
