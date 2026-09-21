@@ -21,3 +21,7 @@ csharp_style_namespace_declarations = file_scoped:suggestion
 csharp_new_line_before_open_brace = all
 csharp_indent_case_contents_when_block = true
 csharp_new_line_between_query_expression_clauses = true
+
+# xUnit test names conventionally use underscores; skip the naming rule for tests.
+[tests/**]
+dotnet_diagnostic.CA1707.severity = none
