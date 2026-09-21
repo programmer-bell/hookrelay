@@ -195,7 +195,7 @@ delivery_attempts  (id, delivery_id FK, attempted_at, status_code, error, durati
 
 ```bash
 # 1. Clone the repo and enter the folder
-git clone https://github.com/<your-username>/hookrelay.git
+git clone https://github.com/programmer-bell/hookrelay.git
 cd hookrelay
 
 # 2. (Optional) create your env file. The defaults use the bundled local Postgres.
