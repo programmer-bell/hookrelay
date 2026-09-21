@@ -1,0 +1,20 @@
+@model string
+@using HookRelay.Domain
+@switch (Model)
+{
+    case DeliveryStatus.Pending:
+        <span class="badge text-bg-secondary">pending</span>
+        break;
+    case DeliveryStatus.Delivering:
+        <span class="badge text-bg-info">delivering</span>
+        break;
+    case DeliveryStatus.Succeeded:
+        <span class="badge text-bg-success">succeeded</span>
+        break;
+    case DeliveryStatus.Dead:
+        <span class="badge text-bg-danger">dead</span>
+        break;
+    default:
+        <span class="badge text-bg-light">@Model</span>
+        break;
+}

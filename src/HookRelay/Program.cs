@@ -5,6 +5,7 @@ using HookRelay.Data;
 using HookRelay.Features.Endpoints;
 using HookRelay.Features.Health;
 using HookRelay.Features.Ingest;
+using HookRelay.Features.Inspector;
 using HookRelay.Middleware;
 using HookRelay.Rendering;
 using HookRelay.Services;
@@ -66,6 +67,7 @@ app.MapRazorPages();
 app.MapHealthEndpoints();
 app.MapEndpointRoutes();
 app.MapIngestEndpoints();
+app.MapInspectorEndpoints();
 
 app.Run();
 

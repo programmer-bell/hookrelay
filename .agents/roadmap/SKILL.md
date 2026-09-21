@@ -81,11 +81,11 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 4: Inspector UI & Live Feed
 **Goal:** See webhooks arrive in real time.
 
-- [ ] `GET /endpoints/{slug}` inspector page: endpoint info (ingest URL with copy button), recent 50 requests (`_RequestRow`)
-- [ ] Expandable row showing method, headers table, pretty-printed body (JSON detected, otherwise raw text)
-- [ ] `GET /endpoints/{slug}/stream` SSE endpoint fed by `EventBus`, with a 15s heartbeat comment
-- [ ] New rows prepend live via htmx SSE (or minimal `EventSource` fallback)
-- [ ] Delivery status badge partial (`_DeliveryBadge`), which reflects pending, succeeded, or dead
+- [x] `GET /endpoints/{slug}` inspector page: endpoint info (ingest URL with copy button), recent 50 requests (`_RequestRow`)
+- [x] Expandable row showing method, headers table, pretty-printed body (JSON detected, otherwise raw text)
+- [x] `GET /endpoints/{slug}/stream` SSE endpoint fed by `EventBus`, with a 15s heartbeat comment
+- [x] New rows prepend live via htmx SSE (or minimal `EventSource` fallback)
+- [x] Delivery status badge partial (`_DeliveryBadge`), which reflects pending, succeeded, or dead
 
 **DoD:** Sending a curl to the ingest URL makes a new row appear in an open browser tab within about 1 second without refresh.
 

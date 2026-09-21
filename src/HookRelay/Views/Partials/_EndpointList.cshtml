@@ -29,6 +29,7 @@ else
                                 <td class="text-break">@endpoint.TargetUrl</td>
                                 <td>@endpoint.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                                 <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-secondary me-1" href="/endpoints/@endpoint.Slug">Inspect</a>
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger"
                                             hx-delete="/endpoints/@endpoint.Id"

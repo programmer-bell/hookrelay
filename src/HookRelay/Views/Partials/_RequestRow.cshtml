@@ -1,0 +1,55 @@
+@model HookRelay.Features.Inspector.RequestRow
+@using HookRelay.Features.Inspector
+<tr data-request-id="@Model.Id">
+    <td><span class="badge text-bg-dark method-badge">@Model.Method</span></td>
+    <td class="text-nowrap">@Model.ReceivedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
+    <td class="text-break">@(Model.Query ?? "—")</td>
+    <td>@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</td>
+    <td class="text-end">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary"
+                data-bs-toggle="collapse"
+                data-bs-target="#request-detail-@Model.Id"
+                aria-expanded="false">
+            Details
+        </button>
+    </td>
+</tr>
+<tr class="request-detail">
+    <td colspan="5">
+        <div id="request-detail-@Model.Id" class="collapse">
+            <div class="row g-3 pt-2">
+                <div class="col-md-5">
+                    <h6 class="text-muted">Headers</h6>
+                    @{
+                        var headers = RequestFormatter.ParseHeaders(Model.Headers);
+                    }
+                    @if (headers.Count == 0)
+                    {
+                        <p class="text-muted small mb-0">None.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped mb-0">
+                                <tbody>
+                                    @foreach (var header in headers)
+                                    {
+                                        <tr>
+                                            <th scope="row" class="text-muted small">@header.Name</th>
+                                            <td class="small text-break">@header.Value</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-7">
+                    <h6 class="text-muted">Body</h6>
+                    <pre class="request-body"><code class="small">@RequestFormatter.PrettyPrintBody(Model.Body)</code></pre>
+                </div>
+            </div>
+        </div>
+    </td>
+</tr>
