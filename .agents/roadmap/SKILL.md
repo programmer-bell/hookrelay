@@ -52,12 +52,12 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 2: Endpoint Management UI
 **Goal:** Create/list/delete endpoints from the browser using htmx.
 
-- [ ] Layout with Bootstrap 5 (CDN) + htmx script
-- [ ] `GET /` dashboard listing endpoints (`_EndpointList` partial)
-- [ ] `POST /endpoints` (`hx-post`): fields `name`, `target_url`; server generates `slug` (10 chars, URL-safe, crypto-random) and `signing_secret` (32 bytes, hex)
-- [ ] Validate `target_url` (http/https only, **SSRF checks from Instructions §5**), return validation errors as a fragment with status 422
-- [ ] `DELETE /endpoints/{id}` (`hx-delete`, `hx-confirm`)
-- [ ] Unit tests for URL/SSRF validation
+- [x] Layout with Bootstrap 5 (CDN) + htmx script
+- [x] `GET /` dashboard listing endpoints (`_EndpointList` partial)
+- [x] `POST /endpoints` (`hx-post`): fields `name`, `target_url`; server generates `slug` (10 chars, URL-safe, crypto-random) and `signing_secret` (32 bytes, hex)
+- [x] Validate `target_url` (http/https only, **SSRF checks from Instructions §5**), return validation errors as a fragment with status 422
+- [x] `DELETE /endpoints/{id}` (`hx-delete`, `hx-confirm`)
+- [x] Unit tests for URL/SSRF validation
 
 **DoD:** User can create and delete endpoints with no full-page reloads. Private/loopback targets are rejected. Tests pass.
 
