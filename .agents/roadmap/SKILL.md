@@ -94,12 +94,12 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 5: Delivery Worker
 **Goal:** Reliable, signed forwarding with retries and DLQ.
 
-- [ ] `RetryPolicy` (pure): `NextDelay(attempt, random)` and `IsExhausted(attempt, max)`, plus unit tests for cap, bounds, and jitter range
-- [ ] `HmacSigner` (pure) plus unit tests using a known vector
-- [ ] `DeliveryRepository`: `ClaimDueAsync` (SKIP LOCKED pattern), `MarkSucceeded`, `MarkRetry`, `MarkDead`, `RecoverStuckAsync`, `RecordAttempt`
-- [ ] `DeliveryWorker : BackgroundService` per Instructions §5 (send-time SSRF re-check, timeouts, attempt recording, graceful shutdown)
-- [ ] Publish delivery status change events on `EventBus` so the inspector badge updates live
-- [ ] Attempt history shown in the expanded row (time, status code, duration, error)
+- [x] `RetryPolicy` (pure): `NextDelay(attempt, random)` and `IsExhausted(attempt, max)`, plus unit tests for cap, bounds, and jitter range
+- [x] `HmacSigner` (pure) plus unit tests using a known vector
+- [x] `DeliveryRepository`: `ClaimDueAsync` (SKIP LOCKED pattern), `MarkSucceeded`, `MarkRetry`, `MarkDead`, `RecoverStuckAsync`, `RecordAttempt`
+- [x] `DeliveryWorker : BackgroundService` per Instructions §5 (send-time SSRF re-check, timeouts, attempt recording, graceful shutdown)
+- [x] Publish delivery status change events on `EventBus` so the inspector badge updates live
+- [x] Attempt history shown in the expanded row (time, status code, duration, error)
 
 **DoD:** With a target that returns 500, you can watch attempts 1 to 6 with growing delays, then status `dead`. With a healthy target, status becomes `succeeded` on the first attempt. Killing the container mid-delivery and restarting recovers the stuck job.
 
