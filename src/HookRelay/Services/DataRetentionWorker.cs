@@ -22,13 +22,13 @@ public sealed class DataRetentionWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var cutoff = DateTime.UtcNow.AddDays(-_options.RetentionDays);
         var interval = TimeSpan.FromHours(_options.CheckIntervalHours);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                var cutoff = DateTime.UtcNow.AddDays(-_options.RetentionDays);
                 var deleted = await _captures.DeleteOlderThanAsync(cutoff, stoppingToken);
                 if (deleted > 0)
                 {
