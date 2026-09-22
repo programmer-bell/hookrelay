@@ -1,5 +1,7 @@
 # 🪝 HookRelay
 
+<img src="src/icon/icon.jpg" alt="HookRelay icon" width="120" />
+
 > A tiny, reliable webhook relay and inspector built with **ASP.NET Core 8**, **htmx**, **Bootstrap**, and **PostgreSQL**.
 
 Capture incoming webhooks on unique endpoints, inspect them live, and **reliably forward** them to your target URLs with signed payloads, automatic retries, and a dead-letter queue.
