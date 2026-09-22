@@ -215,14 +215,13 @@ delivery_attempts  (id, delivery_id FK, attempted_at, status_code, error, durati
 git clone https://github.com/programmer-bell/hookrelay.git
 cd hookrelay
 
-# 2. (Optional) create your env file. The defaults use the bundled local Postgres.
-cp .env.example .env
-
-# 3. Build and start everything (app + local Postgres)
+# 2. Build and start everything (app + local Postgres)
 docker compose up --build
 ```
 
 Open **http://localhost:8080**. Migrations run automatically on first boot.
+
+> `docker-compose.yml` already sets all services to sensible defaults, so no env file is needed. If you want to point the app at an external database (for example Neon), edit the `DATABASE_URL` under the `app` service or pass `--env-file`.
 
 ### Day-to-Day Docker Commands
 
