@@ -123,9 +123,9 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 
 - [x] Review the Dockerfile for the non-root user and `PORT` binding, and verify the image builds cleanly
 - [x] Add integration-style test for the ingest idempotency path (may use in-memory fakes; a live DB is optional)
-- [ ] README: fill in live demo URL, verify every command in it
-- [ ] Deploy: Neon DB, Render web service (Docker, Free), env vars, health check `/healthz`
-- [ ] Smoke-test production: create endpoint, send webhook, watch delivery
+- [x] README: fill in live demo URL, verify every command in it
+- [x] Deploy: Neon DB, Render web service (Docker, Free), env vars, health check `/healthz`
+- [x] Smoke-test production: create endpoint, send webhook, watch delivery
 - [x] Optional: add `render.yaml`
 
 **DoD:** Public URL works end to end. README is accurate. All tests pass. No secrets in git history.

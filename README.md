@@ -4,7 +4,7 @@
 
 Capture incoming webhooks on unique endpoints, inspect them live, and **reliably forward** them to your target URLs with signed payloads, automatic retries, and a dead-letter queue.
 
-**Live demo:** _https://hookrelay.onrender.com_ (add after deploy)
+**Live demo:** https://hookrelay-1kz2.onrender.com
 > The free tier sleeps after 15 minutes idle. The first request may take about 50 seconds.
 
 ---
@@ -39,7 +39,7 @@ The build is executed in phases from [`.agents/roadmap/SKILL.md`](.agents/roadma
 | 4 | Inspector UI & Live Feed | ✔ 5/5 | ██████████ |
 | 5 | Delivery Worker | ✔ 6/6 | ██████████ |
 | 6 | Replay & Operability | ✔ 5/5 | ██████████ |
-| 7 | Hardening, Tests, Deploy | ○ 0/6 | ░░░░░░░░░░ |
+| 7 | Hardening, Tests, Deploy | ✔ 6/6 | ██████████ |
 
 ---
 
