@@ -108,11 +108,11 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 ## Phase 6: Replay & Operability
 **Goal:** Operator tools and robustness.
 
-- [ ] `POST /deliveries/{id}/replay` (`hx-post`) resets a `dead` delivery to `pending` with `attempt_count=0`, and returns the updated badge fragment
-- [ ] Filter tabs on the inspector: All / Pending / Succeeded / Dead (`hx-get` with `hx-target`)
-- [ ] Data retention: background cleanup deleting captured requests older than 7 days (runs hourly, in the worker or a second small `BackgroundService`)
-- [ ] Structured logging on key events (ingest, attempt, dead, replay)
-- [ ] Graceful-shutdown verification
+- [x] `POST /deliveries/{id}/replay` (`hx-post`) resets a `dead` delivery to `pending` with `attempt_count=0`, and returns the updated badge fragment
+- [x] Filter tabs on the inspector: All / Pending / Succeeded / Dead (`hx-get` with `hx-target`)
+- [x] Data retention: background cleanup deleting captured requests older than 7 days (runs hourly, in the worker or a second small `BackgroundService`)
+- [x] Structured logging on key events (ingest, attempt, dead, replay)
+- [x] Graceful-shutdown verification
 
 **DoD:** A dead delivery can be replayed from the UI and succeeds once the target is fixed. Old data is purged. Logs are structured.
 

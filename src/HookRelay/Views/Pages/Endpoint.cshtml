@@ -34,7 +34,26 @@
 
             <section>
                 <h2 class="h5 mb-2">Recent requests</h2>
-                <div id="live-feed" hx-ext="sse" sse-connect="@Model.StreamUrl">
+                <ul class="nav nav-pills mb-3" id="status-tabs">
+                    @foreach (var tab in new[]
+                             {
+                                 ("all", "All"),
+                                 ("pending", "Pending"),
+                                 ("succeeded", "Succeeded"),
+                                 ("dead", "Dead"),
+                             })
+                    {
+                        var isActive = string.Equals(Model.CurrentFilter, tab.Item1, StringComparison.Ordinal);
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-2 @(isActive ? "active" : "")"
+                               href="@($"/endpoints/{Model.Endpoint.Slug}?status={tab.Item1}")"
+                               hx-get="@($"/endpoints/{Model.Endpoint.Slug}/rows?status={tab.Item1}")"
+                               hx-target="#request-rows"
+                               hx-swap="innerHTML">@tab.Item2</a>
+                        </li>
+                    }
+                </ul>
+                <div id="live-feed" hx-ext="sse"@(Model.StreamEnabled ? $" sse-connect=\"{Model.StreamUrl}\"" : string.Empty)>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover align-middle mb-0">
                             <thead>
@@ -49,10 +68,7 @@
                             <tbody id="request-rows"
                                    sse-swap="request-row"
                                    hx-swap="afterbegin">
-                                @foreach (var row in Model.Requests)
-                                {
-                                    @await Html.PartialAsync("~/Views/Partials/_RequestRow.cshtml", row)
-                                }
+                                @await Html.PartialAsync("~/Views/Partials/_RequestRows.cshtml", Model.Requests)
                             </tbody>
                         </table>
                     </div>

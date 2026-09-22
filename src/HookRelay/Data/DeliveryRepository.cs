@@ -136,6 +136,24 @@ public sealed class DeliveryRepository
         return await connection.ExecuteAsync(sql);
     }
 
+    public async Task<DeliveryReplayInfo?> ReplayAsync(Guid deliveryId, CancellationToken ct = default)
+    {
+        const string sql = """
+            UPDATE deliveries d
+            SET status = 'pending', attempt_count = 0, next_attempt_at = now(),
+                last_status_code = NULL, last_error = NULL, updated_at = now()
+            FROM captured_requests c, endpoints e
+            WHERE d.id = @DeliveryId
+              AND d.status = 'dead'
+              AND c.id = d.request_id
+              AND e.id = c.endpoint_id
+            RETURNING d.id AS "DeliveryId", d.request_id AS "RequestId", e.slug AS "Slug"
+            """;
+
+        await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
+        return await connection.QuerySingleOrDefaultAsync<DeliveryReplayInfo>(sql, new { deliveryId });
+    }
+
     public async Task<IReadOnlyList<RequestAttempt>> GetAttemptsAsync(
         IReadOnlyList<Guid> requestIds,
         CancellationToken ct = default)
@@ -155,6 +173,8 @@ public sealed class DeliveryRepository
         return rows.Select(r => new RequestAttempt(r.RequestId, new DeliveryAttempt(r.StatusCode, r.DurationMs, r.Error, r.AttemptedAt)))
                    .ToList();
     }
+
+    public sealed record DeliveryReplayInfo(Guid DeliveryId, Guid RequestId, string Slug);
 
     private sealed record DeliveryClaim(Guid DeliveryId, Guid RequestId, int AttemptCount);
 

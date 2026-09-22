@@ -38,7 +38,7 @@ The build is executed in phases from [`.agents/roadmap/SKILL.md`](.agents/roadma
 | 3 | Ingest API | ✔ 7/7 | ██████████ |
 | 4 | Inspector UI & Live Feed | ✔ 5/5 | ██████████ |
 | 5 | Delivery Worker | ✔ 6/6 | ██████████ |
-| 6 | Replay & Operability | ○ 0/5 | ░░░░░░░░░░ |
+| 6 | Replay & Operability | ✔ 5/5 | ██████████ |
 | 7 | Hardening, Tests, Deploy | ○ 0/6 | ░░░░░░░░░░ |
 
 ---

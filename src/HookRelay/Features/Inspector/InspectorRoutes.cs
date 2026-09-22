@@ -7,12 +7,18 @@ namespace HookRelay.Features.Inspector;
 
 public static class InspectorRoutes
 {
+    private const int RecentRequestLimit = 50;
     private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(15);
 
     public static void MapInspectorEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/endpoints/{slug}/stream", StreamAsync);
+        app.MapGet("/endpoints/{slug}/rows", RequestRowsAsync);
+        app.MapPost("/deliveries/{id:guid}/replay", ReplayAsync);
     }
+
+    private static ILogger GetLogger(ILoggerFactory factory) =>
+        factory.CreateLogger(typeof(InspectorRoutes).FullName ?? nameof(InspectorRoutes));
 
     private static async Task StreamAsync(
         string slug,
@@ -56,7 +62,8 @@ public static class InspectorRoutes
                                 @event.Body,
                                 @event.Query,
                                 @event.ReceivedAt,
-                                DeliveryStatus.Pending);
+                                DeliveryStatus.Pending,
+                                DeliveryId: null);
 
                             var html = await renderer.RenderToStringAsync(
                                 "~/Views/Partials/_RequestRow.cshtml",
@@ -103,4 +110,75 @@ public static class InspectorRoutes
     {
         await context.Response.WriteAsync($"event: {eventName}\ndata: {data}\n\n", ct);
     }
+
+    private static async Task<IResult> RequestRowsAsync(
+        string slug,
+        string? status,
+        EndpointRepository endpoints,
+        CaptureRepository captures,
+        DeliveryRepository deliveries,
+        IRazorViewRenderer renderer,
+        CancellationToken ct)
+    {
+        var endpoint = await endpoints.GetBySlugAsync(slug, ct);
+        if (endpoint is null)
+        {
+            return Results.NotFound();
+        }
+
+        var filter = StatusFilter.Normalize(status);
+        var statusFilter = filter == StatusFilter.All ? null : filter;
+        var requests = await captures.GetRecentAsync(endpoint.Id, RecentRequestLimit, statusFilter, ct);
+        var attempts = await deliveries.GetAttemptsAsync(requests.Select(r => r.Id).ToList(), ct);
+        var attemptsByRequest = new Dictionary<Guid, IReadOnlyList<DeliveryAttempt>>();
+        foreach (var group in attempts.GroupBy(a => a.RequestId))
+        {
+            attemptsByRequest[group.Key] = group.Select(a => a.Attempt).ToList();
+        }
+
+        var rows = requests
+            .Select(row => row with
+            {
+                Attempts = attemptsByRequest.TryGetValue(row.Id, out var rowAttempts) ? rowAttempts : [],
+            })
+            .ToList();
+
+        var html = await renderer.RenderToStringAsync("~/Views/Partials/_RequestRows.cshtml", rows, ct);
+        return Results.Content(html, "text/html");
+    }
+
+    private static async Task<IResult> ReplayAsync(
+        Guid id,
+        DeliveryRepository deliveries,
+        EventBus eventBus,
+        IRazorViewRenderer renderer,
+        ILoggerFactory loggerFactory,
+        CancellationToken ct)
+    {
+        var logger = GetLogger(loggerFactory);
+        var info = await deliveries.ReplayAsync(id, ct);
+        if (info is null)
+        {
+            return Results.NotFound();
+        }
+
+        eventBus.Publish(new DeliveryStatusChangedEvent(
+            info.DeliveryId,
+            info.RequestId,
+            info.Slug,
+            DeliveryStatus.Pending));
+        LogReplayed(logger, info.DeliveryId, info.RequestId, info.Slug, null);
+
+        var badgeHtml = await renderer.RenderToStringAsync(
+            "~/Views/Partials/_DeliveryBadge.cshtml",
+            DeliveryStatus.Pending,
+            ct);
+        return Results.Content(badgeHtml, "text/html");
+    }
+
+    private static readonly Action<ILogger, Guid, Guid, string, Exception?> LogReplayed =
+        LoggerMessage.Define<Guid, Guid, string>(
+            LogLevel.Information,
+            new EventId(7, "ReplayRequested"),
+            "Delivery {DeliveryId} replayed for request {RequestId} ({Slug})");
 }

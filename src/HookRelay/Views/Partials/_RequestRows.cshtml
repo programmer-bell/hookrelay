@@ -1,0 +1,15 @@
+@model System.Collections.Generic.IReadOnlyList<HookRelay.Features.Inspector.RequestRow>
+@using HookRelay.Features.Inspector
+@if (Model.Count == 0)
+{
+    <tr>
+        <td colspan="5" class="text-muted small">No requests match this filter.</td>
+    </tr>
+}
+else
+{
+    @foreach (var row in Model)
+    {
+        @await Html.PartialAsync("~/Views/Partials/_RequestRow.cshtml", row)
+    }
+}
