@@ -1,125 +1,96 @@
 @page "/endpoints/{slug}"
 @model HookRelay.Views.Pages.EndpointModel
-@{ ViewData["Title"] = Model.Endpoint is null ? "Endpoint" : $"Endpoint: {Model.Endpoint.Name}"; }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] · HookRelay</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/site.css" />
-</head>
-<body>
-    <main class="container py-4">
-        <nav class="mb-3">
-            <a href="/" class="link-secondary">&larr; All endpoints</a>
-        </nav>
+@{
+    ViewData["Title"] = Model.Endpoint is null ? "Endpoint" : Model.Endpoint.Name;
+}
+<div class="container section">
+    @if (Model.Endpoint is null)
+    {
+        <div class="panel panel-pad" style="max-width: 480px; margin: 8vh auto;">
+            <div class="empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5m0 3h.01"/></svg>
+                <p class="empty-title">Endpoint not found</p>
+                <p class="empty-sub">It may have been deleted.</p>
+                <a class="btn btn-ghost" href="/" style="margin-top: 12px;">&larr; All endpoints</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="reveal">
+            <a class="nav-link" href="/" style="padding-left: 0; display: inline-flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6-7-7 7 7 7"/></svg>
+                All endpoints
+            </a>
+        </div>
 
-        @if (Model.Endpoint is null)
-        {
-            <div class="alert alert-warning">Endpoint not found.</div>
-        }
-        else
-        {
-            <header class="mb-4">
-                <h1>@Model.Endpoint.Name</h1>
-                <p class="text-muted mb-1">Create this endpoint at <a href="@Model.Endpoint.TargetUrl" target="_blank" rel="noopener">@Model.Endpoint.TargetUrl</a>. Created
-                    @Model.Endpoint.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm").</p>
-                <div class="input-group input-group-sm w-50">
-                    <input id="ingest-url" type="text" class="form-control" value="@Model.IngestUrl" readonly aria-label="Ingest URL" />
-                    <button type="button" id="copy-button" class="btn btn-outline-secondary">Copy</button>
+        <header class="hero reveal">
+            <div class="chip" style="text-transform: none;">
+                <span class="status-dot ok"></span>
+                Event endpoint
+                <small>· created @Model.Endpoint.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</small>
+            </div>
+            <h1>@Model.Endpoint.Name</h1>
+            <p class="lead">Forwards to <a href="@Model.Endpoint.TargetUrl" target="_blank" rel="noopener">@Model.Endpoint.TargetUrl</a></p>
+
+            <div class="copy-group" style="margin-top: 8px; max-width: 640px;">
+                <div class="copy-inputs">
+                    <input id="ingest-url" class="input mono" type="text" value="@Model.IngestUrl" readonly aria-label="Ingest URL" />
+                    <button type="button" class="copy-mini icon-btn" data-copy="#ingest-url" aria-label="Copy ingest URL" title="Copy ingest URL">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    </button>
                 </div>
-            </header>
+                <button type="button" class="btn" data-copy="#ingest-url">Copy</button>
+            </div>
+        </header>
 
-            <section>
-                <h2 class="h5 mb-2">Recent requests</h2>
-                <ul class="nav nav-pills mb-3" id="status-tabs">
+        <section class="panel reveal">
+            <div class="panel-header">
+                <h2>Recent requests</h2>
+                <div class="tabs" id="status-tabs" role="tablist" aria-label="Filter requests">
                     @foreach (var tab in new[]
                              {
-                                 ("all", "All"),
-                                 ("pending", "Pending"),
-                                 ("succeeded", "Succeeded"),
-                                 ("dead", "Dead"),
+                                 ("all", "All", "all"),
+                                 ("pending", "Pending", "pending"),
+                                 ("succeeded", "Succeeded", "succeeded"),
+                                 ("dead", "Dead", "dead"),
                              })
                     {
                         var isActive = string.Equals(Model.CurrentFilter, tab.Item1, StringComparison.Ordinal);
-                        <li class="nav-item">
-                            <a class="nav-link py-1 px-2 @(isActive ? "active" : "")"
-                               href="@($"/endpoints/{Model.Endpoint.Slug}?status={tab.Item1}")"
-                               hx-get="@($"/endpoints/{Model.Endpoint.Slug}/rows?status={tab.Item1}")"
-                               hx-target="#request-rows"
-                               hx-swap="innerHTML">@tab.Item2</a>
-                        </li>
+                        <a class="tab @(isActive ? "active" : "")"
+                           role="tab"
+                           aria-selected="@(isActive ? "true" : "false")"
+                           href="@($"/endpoints/{Model.Endpoint.Slug}?status={tab.Item1}")"
+                           hx-get="@($"/endpoints/{Model.Endpoint.Slug}/rows?status={tab.Item1}")"
+                           hx-target="#request-rows"
+                           hx-swap="innerHTML">@tab.Item2</a>
                     }
-                </ul>
-                <div id="live-feed" hx-ext="sse"@(Model.StreamEnabled ? $" sse-connect=\"{Model.StreamUrl}\"" : string.Empty)>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Method</th>
-                                    <th>Received</th>
-                                    <th>Query</th>
-                                    <th>Delivery</th>
-                                    <th class="text-end">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody id="request-rows"
-                                   sse-swap="request-row"
-                                   hx-swap="afterbegin">
-                                @await Html.PartialAsync("~/Views/Partials/_RequestRows.cshtml", Model.Requests)
-                            </tbody>
-                        </table>
-                    </div>
-                    <span id="delivery-status-target" class="d-none" sse-swap="delivery-status"></span>
                 </div>
-            </section>
-        }
-    </main>
+            </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/htmx.min.js"></script>
+            <div id="live-feed" hx-ext="sse" @(Model.StreamEnabled ? $"sse-connect=\"{Model.StreamUrl}\"" : string.Empty)>
+                <div class="table-wrap">
+                    <table class="table hover">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Received</th>
+                                <th class="hide-sm">Query</th>
+                                <th>Delivery</th>
+                                <th class="text-right" style="text-align: right;">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="request-rows" sse-swap="request-row" hx-swap="afterbegin">
+                            @await Html.PartialAsync("~/Views/Partials/_RequestRows.cshtml", Model.Requests)
+                        </tbody>
+                    </table>
+                </div>
+                <span id="delivery-status-target" class="hidden" sse-swap="delivery-status"></span>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
     <script src="/js/htmx-ext-sse.js"></script>
-    <script>
-        document.getElementById('copy-button')?.addEventListener('click', function () {
-            navigator.clipboard.writeText(document.getElementById('ingest-url').value).then(function () {
-                var button = document.getElementById('copy-button');
-                button.textContent = 'Copied';
-                setTimeout(function () { button.textContent = 'Copy'; }, 1500);
-            }).catch(function () {
-                document.getElementById('ingest-url').select();
-            });
-        });
-
-        var requestRows = document.getElementById('request-rows');
-        document.body.addEventListener('htmx:sseMessage', function (event) {
-            var detail = event.detail;
-            if (!detail || !detail.data) return;
-
-            if (detail.type === 'delivery-status') {
-                var parsed = document.createElement('div');
-                parsed.innerHTML = detail.data;
-                var wrapper = parsed.querySelector('span[data-request-id]');
-                if (!wrapper) return;
-                var row = requestRows.querySelector('tr[data-request-id="' + wrapper.getAttribute('data-request-id') + '"]');
-                if (!row) return;
-                var badge = wrapper.querySelector('.badge');
-                var statusCell = row.querySelector('.request-status-cell');
-                if (badge && statusCell) { statusCell.innerHTML = badge.outerHTML; }
-                return;
-            }
-
-            if (detail.type !== 'request-row') return;
-            var seen = new Set();
-            requestRows.querySelectorAll('tr[data-request-id]').forEach(function (row) {
-                var id = row.getAttribute('data-request-id');
-                if (seen.has(id)) { row.remove(); } else { seen.add(id); }
-            });
-            while (requestRows.querySelectorAll('tr').length > 50) {
-                requestRows.removeChild(requestRows.lastElementChild);
-            }
-        });
-    </script>
-</body>
-</html>
+}

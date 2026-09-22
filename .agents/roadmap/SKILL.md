@@ -132,6 +132,19 @@ All .NET commands run via `docker compose run --rm sdk dotnet ...` (see Instruct
 
 ---
 
+## Phase 8: UI Polish
+**Goal:** Vercel-style frontend — responsive, theme-correct, zero Bootstrap.
+
+- [x] Replace Bootstrap 5 layout with a shared `_Layout` + `_ViewStart` over the Razor Pages root (`/Views/Pages`), keeping htmx fragments standalone
+- [x] New design system in `site.css`: dark-first with a light theme toggle, Inter + JetBrains Mono, hairline borders, grid + pointer-tracked glow background
+- [x] Landing/inspector pages rebuilt: hero + system-status chip, segmented filter tabs, panels, method chips, status pills, empty states
+- [x] Vanilla `site.js`: theme toggle, `/readyz` status polling, copy-to-clipboard + toast, detail-row collapse, SSE row entrance/flash, reveal-on-scroll, reduced-motion guards
+- [x] Responsive tables/forms; all micro-interactions use `prefers-reduced-motion` fallbacks
+
+**DoD:** No Bootstrap references remain. Dashboard + inspector render on desktop and ≤460px. Live webhook → new row appears with entrance/flash animation within ~1 s; dead → replay from the inspector. All tests pass.
+
+---
+
 ## Backlog (only if asked by the user)
 
 - API key auth / multi-user

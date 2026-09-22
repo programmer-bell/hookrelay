@@ -1,48 +1,67 @@
 @model System.Collections.Generic.IReadOnlyList<HookRelay.Domain.Endpoint>
-
 @if (Model.Count == 0)
 {
-    <div class="alert alert-secondary" role="alert">No endpoints yet. Create one above to get started.</div>
+    <div class="panel">
+        <div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/></svg>
+            <p class="empty-title">No endpoints yet</p>
+            <p class="empty-sub">Create one above — the first webhook arrives in seconds.</p>
+        </div>
+    </div>
 }
 else
 {
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h2 class="card-title h5 mb-3">Endpoints</h2>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Ingest slug</th>
-                            <th>Target URL</th>
-                            <th>Created</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var endpoint in Model)
-                        {
-                            <tr>
-                                <td>@endpoint.Name</td>
-                                <td><code>@endpoint.Slug</code></td>
-                                <td class="text-break">@endpoint.TargetUrl</td>
-                                <td>@endpoint.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                                <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-secondary me-1" href="/endpoints/@endpoint.Slug">Inspect</a>
+    <div class="panel" id="endpoints-panel">
+        <div class="panel-header">
+            <h2>Endpoints <span class="chip" style="margin-left: 8px;">@Model.Count</span></h2>
+            <span class="hint hide-sm">Click any name to open its inspector</span>
+        </div>
+        <div class="table-wrap">
+            <table class="table hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Ingest slug</th>
+                        <th class="hide-sm">Target</th>
+                        <th class="hide-sm">Created</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var endpoint in Model)
+                    {
+                        <tr data-endpoint-id="@endpoint.Id">
+                            <td>
+                                <a class="table-name" href="/endpoints/@endpoint.Slug">@endpoint.Name</a>
+                            </td>
+                            <td>
+                                <span class="code-chip">@endpoint.Slug</span>
+                                <button type="button"
+                                        class="copy-mini icon-btn"
+                                        style="position: static; transform: none; width: 22px; height: 22px; margin-left: 4px;"
+                                        data-copy-ingest="@endpoint.Slug"
+                                        aria-label="Copy ingest URL"
+                                        title="Copy ingest URL">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 12px; height: 12px;"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                                </button>
+                            </td>
+                            <td class="hide-sm code-cell">@endpoint.TargetUrl</td>
+                            <td class="hide-sm">@endpoint.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                            <td style="text-align: right;">
+                                <div class="row-actions">
+                                    <a class="btn btn-sm btn-ghost" href="/endpoints/@endpoint.Slug">Inspect</a>
                                     <button type="button"
-                                            class="btn btn-sm btn-outline-danger"
+                                            class="btn btn-sm btn-danger"
                                             hx-delete="/endpoints/@endpoint.Id"
                                             hx-target="#endpoint-list"
-                                            hx-confirm="Delete endpoint '@endpoint.Name'?">
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                            hx-swap="innerHTML"
+                                            hx-confirm="Delete endpoint '@endpoint.Name'?">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 }
