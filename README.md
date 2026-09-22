@@ -1,6 +1,8 @@
-# 🪝 HookRelay
+<div align="center">
+  <img src="src/icon/icon.jpg" alt="HookRelay logo" width="96" height="96" />
+</div>
 
-<img src="src/icon/icon.jpg" alt="HookRelay icon" width="120" />
+<h1 align="center">HookRelay</h1>
 
 > A tiny, reliable webhook relay and inspector built with **ASP.NET Core 8**, **htmx**, **Bootstrap**, and **PostgreSQL**.
 
@@ -8,6 +10,10 @@ Capture incoming webhooks on unique endpoints, inspect them live, and **reliably
 
 **Live demo:** https://hookrelay-1kz2.onrender.com
 > The free tier sleeps after 15 minutes idle. The first request may take about 50 seconds.
+
+<div align="center">
+  <img src="src/icon/screenshort.png" alt="HookRelay dashboard screenshot" width="800" />
+</div>
 
 ---
 
