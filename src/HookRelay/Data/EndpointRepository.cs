@@ -3,7 +3,7 @@ using Endpoint = HookRelay.Domain.Endpoint;
 
 namespace HookRelay.Data;
 
-public sealed class EndpointRepository
+public sealed class EndpointRepository : IEndpointRepository
 {
     private readonly Db _db;
 

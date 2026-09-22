@@ -4,7 +4,7 @@ using HookRelay.Features.Inspector;
 
 namespace HookRelay.Data;
 
-public sealed class CaptureRepository
+public sealed class CaptureRepository : ICaptureRepository
 {
     private readonly Db _db;
 

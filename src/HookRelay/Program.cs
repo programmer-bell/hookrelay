@@ -22,8 +22,11 @@ builder.Services.AddRazorPages(options => options.RootDirectory = "/Views/Pages"
 builder.Services.AddSingleton(services =>
     Db.Open(builder.Configuration, services.GetRequiredService<ILogger<Db>>()));
 builder.Services.AddSingleton<EndpointRepository>();
+builder.Services.AddSingleton<IEndpointRepository>(services => services.GetRequiredService<EndpointRepository>());
 builder.Services.AddSingleton<CaptureRepository>();
+builder.Services.AddSingleton<ICaptureRepository>(services => services.GetRequiredService<CaptureRepository>());
 builder.Services.AddSingleton<DeliveryRepository>();
+builder.Services.AddSingleton<IngestRecorder>();
 builder.Services.AddSingleton<TargetUrlValidator>();
 builder.Services.AddSingleton(services =>
 {

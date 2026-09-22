@@ -1,7 +1,4 @@
 using System.Text;
-using HookRelay.Data;
-using HookRelay.Domain;
-using HookRelay.Services;
 
 namespace HookRelay.Features.Ingest;
 
@@ -23,18 +20,11 @@ public static class IngestEndpoints
     private static async Task<IResult> HandleIngestAsync(
         string slug,
         HttpRequest request,
-        EndpointRepository endpoints,
-        CaptureRepository captures,
-        EventBus eventBus,
+        IngestRecorder recorder,
         ILoggerFactory loggerFactory,
         CancellationToken ct)
     {
         var logger = GetLogger(loggerFactory);
-        var endpoint = await endpoints.GetBySlugAsync(slug, ct);
-        if (endpoint is null)
-        {
-            return Results.NotFound();
-        }
 
         if (request.ContentLength is > MaxBodyBytes)
         {
@@ -47,40 +37,27 @@ public static class IngestEndpoints
             return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
         }
 
-        var idempotencyKey = request.Headers["Idempotency-Key"].ToString().Trim();
-        if (idempotencyKey.Length > 0)
-        {
-            var existing = await captures.FindByIdempotencyKeyAsync(endpoint.Id, idempotencyKey, ct);
-            if (existing is not null)
-            {
-                return Results.Json(new { id = existing.Id }, statusCode: StatusCodes.Status200OK);
-            }
-        }
-
-        var receivedAt = TimeProvider.System.GetUtcNow().UtcDateTime;
-        var captured = new CapturedRequest(
-            Guid.NewGuid(),
-            endpoint.Id,
+        var result = await recorder.RecordAsync(
+            slug,
             request.Method,
             HeaderRedaction.ToJson(request.Headers),
             body,
             request.QueryString.HasValue ? request.QueryString.Value : null,
-            idempotencyKey.Length > 0 ? idempotencyKey : null,
-            receivedAt);
+            request.Headers["Idempotency-Key"].ToString().Trim(),
+            ct);
 
-        await captures.CaptureAsync(captured, ct);
-        eventBus.Publish(new RequestCapturedEvent(
-            captured.Id,
-            endpoint.Id,
-            endpoint.Slug,
-            request.Method,
-            captured.Headers,
-            captured.Body,
-            captured.Query,
-            receivedAt));
-        LogCaptured(logger, captured.Id, endpoint.Id, endpoint.Slug, request.Method, null);
+        if (result.Outcome == IngestOutcome.EndpointNotFound)
+        {
+            return Results.NotFound();
+        }
 
-        return Results.Json(new { id = captured.Id }, statusCode: StatusCodes.Status202Accepted);
+        if (result.Outcome == IngestOutcome.Existing)
+        {
+            return Results.Json(new { id = result.RequestId }, statusCode: StatusCodes.Status200OK);
+        }
+
+        LogCaptured(logger, result.RequestId!.Value, result.EndpointId, result.Slug!, request.Method, null);
+        return Results.Json(new { id = result.RequestId }, statusCode: StatusCodes.Status202Accepted);
     }
 
     private static readonly Action<ILogger, Guid, Guid, string, string, Exception?> LogCaptured =
