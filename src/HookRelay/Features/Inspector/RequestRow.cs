@@ -9,7 +9,8 @@ public sealed record RequestRow(
     string Body,
     string? Query,
     DateTime ReceivedAt,
-    string DeliveryStatus)
+    string DeliveryStatus,
+    Guid? DeliveryId)
 {
     public IReadOnlyList<DeliveryAttempt> Attempts { get; init; } = [];
 }

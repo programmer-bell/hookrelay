@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
+builder.Services.Configure<RetentionOptions>(builder.Configuration.GetSection(RetentionOptions.SectionName));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages(options => options.RootDirectory = "/Views/Pages");
@@ -33,6 +34,7 @@ builder.Services.AddSingleton<IRazorViewRenderer, RazorViewRenderer>();
 builder.Services.AddSingleton<EventBus>();
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 builder.Services.AddHostedService<DeliveryWorker>();
+builder.Services.AddHostedService<DataRetentionWorker>();
 
 builder.Services.AddHttpClient(DeliveryWorker.HttpClientName, (services, client) =>
 {

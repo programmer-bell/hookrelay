@@ -59,21 +59,34 @@ public sealed class CaptureRepository
     public async Task<IReadOnlyList<RequestRow>> GetRecentAsync(
         Guid endpointId,
         int limit,
+        string? status = null,
         CancellationToken ct = default)
     {
         const string sql = """
             SELECT c.id AS "Id", c.method AS "Method", c.headers AS "Headers",
                    c.body AS "Body", c.query AS "Query", c.received_at AS "ReceivedAt",
-                   d.status AS "DeliveryStatus"
+                   d.status AS "DeliveryStatus", d.id AS "DeliveryId"
             FROM captured_requests c
             JOIN deliveries d ON d.request_id = c.id
             WHERE c.endpoint_id = @EndpointId
+              AND (@Status IS NULL OR d.status = @Status)
             ORDER BY c.received_at DESC, c.id DESC
             LIMIT @Limit
             """;
 
         await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
-        var rows = await connection.QueryAsync<RequestRow>(sql, new { endpointId, limit });
+        var rows = await connection.QueryAsync<RequestRow>(sql, new { endpointId, limit, status });
         return rows.ToList();
+    }
+
+    public async Task<int> DeleteOlderThanAsync(DateTime cutoff, CancellationToken ct = default)
+    {
+        const string sql = """
+            DELETE FROM captured_requests
+            WHERE received_at < @Cutoff
+            """;
+
+        await using var connection = await _db.DataSource.OpenConnectionAsync(ct);
+        return await connection.ExecuteAsync(sql, new { cutoff });
     }
 }

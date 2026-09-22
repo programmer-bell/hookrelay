@@ -223,6 +223,7 @@ public sealed class DeliveryWorker : BackgroundService
         {
             await _deliveries.MarkDeadAsync(job.DeliveryId, ct);
             PublishStatus(job, DeliveryStatus.Dead);
+            LogDeliveryDead(_logger, job.DeliveryId, job.AttemptCount + 1, null);
         }
         else
         {
@@ -266,6 +267,9 @@ public sealed class DeliveryWorker : BackgroundService
 
     private static readonly Action<ILogger, Guid, int, long, Exception?> LogAttemptSucceeded =
         LoggerMessage.Define<Guid, int, long>(LogLevel.Information, new EventId(4, "AttemptSucceeded"), "Delivery {DeliveryId} attempt returned {StatusCode} in {DurationMs} ms");
+
+    private static readonly Action<ILogger, Guid, int, Exception?> LogDeliveryDead =
+        LoggerMessage.Define<Guid, int>(LogLevel.Warning, new EventId(9, "DeliveryDead"), "Delivery {DeliveryId} dead after {AttemptCount} attempts");
 
     private static readonly Action<ILogger, int, Exception?> LogRecovered =
         LoggerMessage.Define<int>(LogLevel.Warning, new EventId(5, "RecoveredStuck"), "Recovered {Count} deliveries stuck in 'delivering'");

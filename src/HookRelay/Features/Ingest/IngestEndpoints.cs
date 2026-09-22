@@ -17,14 +17,19 @@ public static class IngestEndpoints
             .RequireRateLimiting("ingest");
     }
 
+    private static ILogger GetLogger(ILoggerFactory factory) =>
+        factory.CreateLogger(typeof(IngestEndpoints).FullName ?? nameof(IngestEndpoints));
+
     private static async Task<IResult> HandleIngestAsync(
         string slug,
         HttpRequest request,
         EndpointRepository endpoints,
         CaptureRepository captures,
         EventBus eventBus,
+        ILoggerFactory loggerFactory,
         CancellationToken ct)
     {
+        var logger = GetLogger(loggerFactory);
         var endpoint = await endpoints.GetBySlugAsync(slug, ct);
         if (endpoint is null)
         {
@@ -73,9 +78,16 @@ public static class IngestEndpoints
             captured.Body,
             captured.Query,
             receivedAt));
+        LogCaptured(logger, captured.Id, endpoint.Id, endpoint.Slug, request.Method, null);
 
         return Results.Json(new { id = captured.Id }, statusCode: StatusCodes.Status202Accepted);
     }
+
+    private static readonly Action<ILogger, Guid, Guid, string, string, Exception?> LogCaptured =
+        LoggerMessage.Define<Guid, Guid, string, string>(
+            LogLevel.Information,
+            new EventId(8, "RequestCaptured"),
+            "Captured {Method} request {RequestId} for endpoint {EndpointId} ({Slug})");
 
     private static async Task<string?> ReadBodyWithLimitAsync(Stream body, int maxBytes, CancellationToken ct)
     {

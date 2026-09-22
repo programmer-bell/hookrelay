@@ -27,9 +27,16 @@ public class EndpointModel : PageModel
     [FromRoute]
     public string? Slug { get; set; }
 
+    [FromQuery(Name = "status")]
+    public string? Status { get; set; }
+
     public Endpoint? Endpoint { get; private set; }
 
     public IReadOnlyList<RequestRow> Requests { get; private set; } = [];
+
+    public string CurrentFilter { get; private set; } = StatusFilter.All;
+
+    public bool StreamEnabled => CurrentFilter == StatusFilter.All;
 
     public string IngestUrl { get; private set; } = string.Empty;
 
@@ -49,10 +56,12 @@ public class EndpointModel : PageModel
         }
 
         Endpoint = endpoint;
+        CurrentFilter = StatusFilter.Normalize(Status);
         IngestUrl = $"{Request.Scheme}://{Request.Host}/h/{endpoint.Slug}";
         StreamUrl = $"/endpoints/{endpoint.Slug}/stream";
 
-        var requests = await _captures.GetRecentAsync(endpoint.Id, RecentRequestLimit, ct);
+        var statusFilter = CurrentFilter == StatusFilter.All ? null : CurrentFilter;
+        var requests = await _captures.GetRecentAsync(endpoint.Id, RecentRequestLimit, statusFilter, ct);
         var attemptsByRequest = await LoadAttemptsAsync(requests, ct);
 
         Requests = requests

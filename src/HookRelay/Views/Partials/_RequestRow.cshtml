@@ -1,10 +1,21 @@
 @model HookRelay.Features.Inspector.RequestRow
+@using HookRelay.Domain
 @using HookRelay.Features.Inspector
 <tr data-request-id="@Model.Id">
     <td><span class="badge text-bg-dark method-badge">@Model.Method</span></td>
     <td class="text-nowrap">@Model.ReceivedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
     <td class="text-break">@(Model.Query ?? "—")</td>
-    <td><span class="request-status-cell">@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</span></td>
+    <td>
+        <span class="request-status-cell">@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</span>
+        @if (Model.DeliveryStatus == DeliveryStatus.Dead && Model.DeliveryId is not null)
+        {
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    hx-post="/deliveries/@Model.DeliveryId.Value/replay"
+                    hx-target="closest .request-status-cell"
+                    hx-swap="innerHTML">Replay</button>
+        }
+    </td>
     <td class="text-end">
         <button type="button"
                 class="btn btn-sm btn-outline-secondary"
