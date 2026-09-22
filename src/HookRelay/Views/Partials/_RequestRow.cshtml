@@ -1,101 +1,129 @@
 @model HookRelay.Features.Inspector.RequestRow
 @using HookRelay.Domain
 @using HookRelay.Features.Inspector
+@{
+    var methodClass = Model.Method.ToLowerInvariant() switch
+    {
+        "get" => "get",
+        "post" => "post",
+        "put" => "put",
+        "patch" => "patch",
+        "delete" => "delete",
+        _ => "other",
+    };
+}
 <tr data-request-id="@Model.Id">
-    <td><span class="badge text-bg-dark method-badge">@Model.Method</span></td>
-    <td class="text-nowrap">@Model.ReceivedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
-    <td class="text-break">@(Model.Query ?? "—")</td>
+    <td><span class="method @methodClass">@Model.Method</span></td>
+    <td class="nowrap code-cell">@Model.ReceivedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
+    <td class="hide-sm code-cell">@(Model.Query ?? "—")</td>
     <td>
         <span class="request-status-cell">@await Html.PartialAsync("~/Views/Partials/_DeliveryBadge.cshtml", Model.DeliveryStatus)</span>
         @if (Model.DeliveryStatus == DeliveryStatus.Dead && Model.DeliveryId is not null)
         {
             <button type="button"
-                    class="btn btn-sm btn-outline-danger ms-2"
+                    class="btn btn-sm btn-danger"
+                    style="margin-left: 6px;"
                     hx-post="/deliveries/@Model.DeliveryId.Value/replay"
                     hx-target="closest td"
                     hx-swap="innerHTML">Replay</button>
         }
     </td>
-    <td class="text-end">
+    <td style="text-align: right;">
         <button type="button"
-                class="btn btn-sm btn-outline-secondary"
-                data-bs-toggle="collapse"
-                data-bs-target="#request-detail-@Model.Id"
-                aria-expanded="false">
+                class="btn btn-sm btn-ghost"
+                data-collapse="#request-detail-@Model.Id"
+                aria-expanded="false"
+                aria-controls="request-detail-@Model.Id">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
             Details
         </button>
     </td>
 </tr>
 <tr class="request-detail">
-    <td colspan="5">
-        <div id="request-detail-@Model.Id" class="collapse">
-            <div class="row g-3 pt-2">
-                <div class="col-md-5">
-                    <h6 class="text-muted">Headers</h6>
-                    @{
-                        var headers = RequestFormatter.ParseHeaders(Model.Headers);
-                    }
-                    @if (headers.Count == 0)
-                    {
-                        <p class="text-muted small mb-0">None.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped mb-0">
-                                <tbody>
-                                    @foreach (var header in headers)
-                                    {
-                                        <tr>
-                                            <th scope="row" class="text-muted small">@header.Name</th>
-                                            <td class="small text-break">@header.Value</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+    <td colspan="5" class="detail-cell">
+        <div id="request-detail-@Model.Id">
+            <div class="detail-inner">
+                <div class="detail-pad">
+                    <div class="detail-grid">
+                        <div>
+                            <h3 class="detail-h">Headers</h3>
+                            @{
+                                var headers = RequestFormatter.ParseHeaders(Model.Headers);
+                            }
+                            @if (headers.Count == 0)
+                            {
+                                <p class="hint">None.</p>
+                            }
+                            else
+                            {
+                                <div class="table-wrap">
+                                    <table class="keyvals">
+                                        <tbody>
+                                            @foreach (var header in headers)
+                                            {
+                                                <tr>
+                                                    <th>@header.Name</th>
+                                                    <td>@header.Value</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
                         </div>
-                    }
-                </div>
-                <div class="col-md-7">
-                    <h6 class="text-muted">Body</h6>
-                    <pre class="request-body"><code class="small">@RequestFormatter.PrettyPrintBody(Model.Body)</code></pre>
-                </div>
+                        <div>
+                            <h3 class="detail-h">Body</h3>
+                            <pre class="body-pre"><code>@RequestFormatter.PrettyPrintBody(Model.Body)</code></pre>
+                        </div>
+                    </div>
 
-                <div class="col-12">
-                    <h6 class="text-muted">Attempts</h6>
-                    @if (Model.Attempts.Count == 0)
-                    {
-                        <p class="text-muted small mb-0">No attempts yet.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Time</th>
-                                        <th>Status</th>
-                                        <th>Duration</th>
-                                        <th>Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (var i = 0; i < Model.Attempts.Count; i++)
-                                    {
-                                        var attempt = Model.Attempts[i];
+                    <div style="margin-top: 20px;">
+                        <h3 class="detail-h">Attempts</h3>
+                        @if (Model.Attempts.Count == 0)
+                        {
+                            <p class="hint">No attempts yet.</p>
+                        }
+                        else
+                        {
+                            <div class="table-wrap">
+                                <table class="attempt-table">
+                                    <thead>
                                         <tr>
-                                            <td class="small">@(i + 1)</td>
-                                            <td class="small text-nowrap">@attempt.AttemptedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                            <td class="small">@(attempt.StatusCode is null ? "—" : attempt.StatusCode.Value.ToString())</td>
-                                            <td class="small">@(attempt.DurationMs is null ? "—" : $"{attempt.DurationMs.Value} ms")</td>
-                                            <td class="small text-break">@(attempt.Error ?? "—")</td>
+                                            <th>#</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Duration</th>
+                                            <th>Error</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
+                                    </thead>
+                                    <tbody>
+                                        @for (var i = 0; i < Model.Attempts.Count; i++)
+                                        {
+                                            var attempt = Model.Attempts[i];
+                                            var code = attempt.StatusCode;
+                                            var okClass = code.HasValue && code.Value is >= 200 and < 300 ? "ok" : "bad";
+                                            <tr>
+                                                <td class="code-cell">@(i + 1)</td>
+                                                <td class="code-cell nowrap">@attempt.AttemptedAt.ToLocalTime().ToString("MMM d, HH:mm:ss")</td>
+                                                <td>
+                                                    @if (code.HasValue)
+                                                    {
+                                                        <span class="code-chip @okClass">@code.Value</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="hint">—</span>
+                                                    }
+                                                </td>
+                                                <td class="code-cell">@(attempt.DurationMs is null ? "—" : $"{attempt.DurationMs.Value} ms")</td>
+                                                <td class="code-cell">@(attempt.Error ?? "—")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

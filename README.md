@@ -42,13 +42,14 @@ The build is executed in phases from [`.agents/roadmap/SKILL.md`](.agents/roadma
 | 5 | Delivery Worker | ✔ 6/6 | ██████████ |
 | 6 | Replay & Operability | ✔ 5/5 | ██████████ |
 | 7 | Hardening, Tests, Deploy | ✔ 6/6 | ██████████ |
+| 8 | UI Polish | ✔ 5/5 | ██████████ |
 
 ---
 
 ## 🧱 Tech Stack
 
 - **Runtime:** .NET 8 (LTS), ASP.NET Core Minimal APIs
-- **UI:** Razor Pages (partials only) + [htmx](https://htmx.org) + Bootstrap 5 (CDN)
+- **UI:** Razor Pages (partials only) + [htmx](https://htmx.org) + a vanilla-JS design system (no Bootstrap)
 - **Database:** PostgreSQL on Neon (free tier)
 - **Data access:** [Npgsql](https://www.npgsql.org) + [Dapper](https://github.com/DapperLib/Dapper), with no EF Core
 - **Queue:** PostgreSQL `FOR UPDATE SKIP LOCKED`, no Redis or RabbitMQ

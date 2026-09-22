@@ -3,33 +3,37 @@
 @{
     var form = Model ?? new EndpointFormModel("", "", Array.Empty<string>());
 }
-<div class="card shadow-sm">
-    <div class="card-body">
-        <h2 class="card-title h5 mb-3">Add endpoint</h2>
-        <form hx-post="/endpoints"
-              hx-target="#endpoint-list"
-              hx-target-error="#endpoint-form"
-              hx-on::after-request="if(event.detail.successful) this.reset()">
-            @if (form.Errors.Count > 0)
-            {
-                <div class="alert alert-danger py-2" role="alert">
-                    <ul class="mb-0">
-                        @foreach (var error in form.Errors)
-                        {
-                            <li>@error</li>
-                        }
-                    </ul>
-                </div>
-            }
-            <div class="mb-3">
-                <label class="form-label" for="endpoint-name">Name</label>
-                <input class="form-control" type="text" id="endpoint-name" name="name" value="@form.Name" placeholder="Stripe webhooks" required />
+<div class="panel panel-pad">
+    @if (form.Errors.Count > 0)
+    {
+        <div class="form-error" role="alert">
+            <ul>
+                @foreach (var error in form.Errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+    <form hx-post="/endpoints"
+          hx-target="#endpoint-list"
+          hx-target-error="#endpoint-form"
+          hx-disabled-elt="find button"
+          hx-on::after-request="if(event.detail.successful) this.reset()">
+        <div class="form-grid">
+            <div class="field">
+                <label for="endpoint-name">Name</label>
+                <input class="input" type="text" id="endpoint-name" name="name" value="@form.Name" placeholder="Stripe webhooks" required autocomplete="off" />
             </div>
-            <div class="mb-3">
-                <label class="form-label" for="endpoint-target-url">Target URL</label>
-                <input class="form-control" type="url" id="endpoint-target-url" name="target_url" value="@form.TargetUrl" placeholder="https://example.com/hooks" required />
+            <div class="field">
+                <label for="endpoint-target-url">Target URL</label>
+                <input class="input mono" type="url" id="endpoint-target-url" name="target_url" value="@form.TargetUrl" placeholder="https://example.com/hooks" required />
             </div>
-            <button type="submit" class="btn btn-primary">Create endpoint</button>
-        </form>
-    </div>
+            <button type="submit" class="btn btn-primary htmx-request">
+                Create endpoint
+                <span class="htmx-indicator spinner" aria-hidden="true"></span>
+            </button>
+        </div>
+        <p class="hint" style="margin: 10px 0 0;">Each endpoint gets a unique ingest URL like <code>/h/&lt;slug&gt;</code>. Outbound calls are HMAC-signed and retried up to 6&nbsp;times.</p>
+    </form>
 </div>

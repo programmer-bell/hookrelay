@@ -3,18 +3,18 @@
 @switch (Model)
 {
     case DeliveryStatus.Pending:
-        <span class="badge text-bg-secondary">pending</span>
+        <span class="status status-pending" data-badge=""><span class="dot"></span>pending</span>
         break;
     case DeliveryStatus.Delivering:
-        <span class="badge text-bg-info">delivering</span>
+        <span class="status status-delivering" data-badge=""><span class="dot"></span>delivering</span>
         break;
     case DeliveryStatus.Succeeded:
-        <span class="badge text-bg-success">succeeded</span>
+        <span class="status status-succeeded" data-badge=""><span class="dot"></span>succeeded</span>
         break;
     case DeliveryStatus.Dead:
-        <span class="badge text-bg-danger">dead</span>
+        <span class="status status-dead" data-badge=""><span class="dot"></span>dead</span>
         break;
     default:
-        <span class="badge text-bg-light">@Model</span>
+        <span class="status status-pending" data-badge=""><span class="dot"></span>@Model</span>
         break;
 }
